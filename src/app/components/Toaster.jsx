@@ -4,10 +4,10 @@ import React from 'react'
 
 const Toast = ({Children}) => {
   return (
-    <div>
+    <>
         {Children}
         <Toaster/>
-    </div>
+    </>
   )
 }
 

@@ -1,6 +1,7 @@
 import { Poppins} from "next/font/google";
 import "./globals.css";
-import Toaster from "./components/Toaster";
+import {Toaster} from "react-hot-toast"
+// import Toaster from "./components/Toaster";
 
 const inter = Poppins({ subsets: ["latin"] , weight:"400"});
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
 
         {children}
         {/* </Toaster> */}
+        <Toaster/>
         </body>
     </html>
   );

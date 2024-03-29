@@ -10,6 +10,7 @@ import InputBox from "./InputBox";
 import GetLocationButton from "./GetLocationButton";
 import WeatherSummary from "./WeatherSummary";
 import Logo from "./Logo";
+import { errorToast, successToast } from "../utils/toast";
 
 const inter = Atomic_Age({ subsets: ["latin"], weight: "400" });
 
@@ -54,13 +55,17 @@ const Weather = () => {
       const data = await response.json();
 
       if (response.ok) {
+        successToast(data.message || "Success");
         setWeatherData(data);
         setError(null);
       } else {
+        errorToast(data.message || "Error fetching weather data");
         throw new Error(data.message || "Error fetching weather data");
       }
     } catch (error) {
       setWeatherData(null);
+      errorToast(error.message || "Error fetching weather data");
+
       setError(error.message || "Error fetching weather data");
     } finally {
       setLoading(false);
@@ -93,13 +98,17 @@ const Weather = () => {
 
         if (response.ok) {
           setWeatherData(data);
+          successToast(data.message || "Success");
           setError(null);
         } else {
+          errorToast(data.message || "Error fetching weather data");
           throw new Error(data.message || "Error fetching weather data");
         }
       });
     } catch (error) {
       setWeatherData(null);
+      errorToast(error.message || "Error fetching weather data");
+
       setError(error.message || "Error fetching weather data");
     } finally {
       setLoading(false);
@@ -160,8 +169,8 @@ const Weather = () => {
   };
 
   return (
-    <main className="snow h-screen bg-center bg-cover bg-no-repeat text-white w-full">
-      <section className="sm:flex items-start justify-between px-4 w-full">
+    <main className="snow md:h-screen h-full bg-center bg-cover bg-no-repeat text-white w-full ">
+      <section className="sm:flex items-start justify-between px-4 w-full h-full">
         <div className="flex flex-col justify-between content-between sm:h-[80vh]">
           <div className=" sm:grid flex justify-between items-center  py-4">
             <Logo style={inter} />
@@ -175,13 +184,19 @@ const Weather = () => {
           <WeatherSummary weatherData={weatherData} />
         </div>
 
-        <div className="sm:w-2/5 w-full drop-shadow-md backdrop-blur-md md:h-screen rounded py-2 pt-4 sm:pt-0 mt-4 sm:mt-0">
+        <div className="sm:w-2/5 w-full drop-shadow-md backdrop-blur-md md:h-screen h-full rounded py-2 pt-4 sm:pt-0 mt-4 sm:mt-0">
           <InputBox city={city} setCity={setCity} />
           <SearchButton loading={loading} handleSearch={handleSearch} />
 
-          <Suggestion suggestions={suggestions} handleSelect={handleSelect} />
+          {weatherData ? (
+            " "
+          ) : (
+            <Suggestion suggestions={suggestions} handleSelect={handleSelect} />
+          )}
 
-          {error && <p className="text-red-800 font-semibold text-center">{error}</p>}
+          {error && (
+            <p className="text-red-800 font-semibold text-center">{error}</p>
+          )}
 
           {loading && <Spinner />}
 
