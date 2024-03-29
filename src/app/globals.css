@@ -9,6 +9,19 @@
 
 }
 
+@media screen and (max-width : 600px) {
+  .snow{
+  background-image:  url("../app/image/rain.png") ;
+
+}
+}
+html{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
 input:active, input:focus{
   outline: 1px solid transparent;
   border: none;

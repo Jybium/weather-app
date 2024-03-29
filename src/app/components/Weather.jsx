@@ -2,31 +2,46 @@
 
 import React, { useState, useEffect } from "react";
 import { Atomic_Age } from "next/font/google";
-import { GrSearch } from "react-icons/gr";
-import { FaTemperatureHigh } from "react-icons/fa6";
-import { TbTemperatureCelsius } from "react-icons/tb";
-import { WiHumidity } from "react-icons/wi";
-import { GiAtSea } from "react-icons/gi";
-import { MdOutlineWindPower } from "react-icons/md";
-import extractDateTime from "../../services/dateExtractor";
-import {Spinner} from "flowbite-react"
+import Spinner from "./Spinner";
+import WeatherInformation from "./WeatherInformation";
+import Suggestion from "./Suggestion";
+import SearchButton from "./SearchButton";
+import InputBox from "./InputBox";
+import GetLocationButton from "./GetLocationButton";
+import WeatherSummary from "./WeatherSummary";
+import Logo from "./Logo";
 
 const inter = Atomic_Age({ subsets: ["latin"], weight: "400" });
 
-const { day, date, time } = extractDateTime();
-
 const Weather = () => {
+  // This state holds the input field data
   const [city, setCity] = useState("");
+
+  // This state holds the result of calling the weather API - Weather data
   const [weatherData, setWeatherData] = useState(null);
+
+  // This state holds the any errors that occurs  due to API calls - Error response
   const [error, setError] = useState(null);
+
+  // This state holds the boolan for keeping track to different API CALL progress state so as to render appropriate component at different stages
   const [loading, setLoading] = useState(false);
+
+  // This state holds the data returned from calling the FIND API to retrieve data corresponding to the user input
   const [suggestions, setSuggestions] = useState([]);
 
   console.log(suggestions);
 
+  // API DATA - request URL and API KEY
   const apiKey = "22ce4cd64e0f27989ae5e8cfb31aa0c4";
   const apiUrl = "https://api.openweathermap.org/data/2.5/weather";
   const autoCompleteUrl = "https://api.openweathermap.org/data/2.5/find";
+
+  /*
+  // This function makes an API call to retrieve weather information from the OpenWeather API according to what it typed in the input field.
+  // It then returns an error or success message
+  // On request success, It returns the weather information
+  // On request error, It returns an error message
+*/
 
   const handleSearch = async () => {
     try {
@@ -52,11 +67,19 @@ const Weather = () => {
     }
   };
 
+  /*
+  // This function makes an API call to retrieve weather information from the OpenWeather API based on the user Geolocation.
+  // It is trigerred by pressing the "Use Location" button on the UI
+  // It then returns an error or success message
+  // On request success, It returns the weather information
+  // On request error, It returns an error message
+*/
+
   const handleGeolocationSearch = async () => {
     try {
       setLoading(true);
-      setCity("")
-      setSuggestions("")
+      setCity("");
+      setSuggestions("");
       navigator.geolocation.getCurrentPosition(async (position) => {
         const { latitude, longitude } = position.coords;
         const url = new URL(apiUrl);
@@ -83,6 +106,14 @@ const Weather = () => {
     }
   };
 
+  /*
+  // This function makes an API call to retrieve location information from the OpenWeather API based on the user input to the input field.
+  // It is trigerred by pressing the typing in the input field provided that the text in the input field is greater than 3
+  // It then returns an error or success message
+  // On request success, It returns a list of cities information
+  // On request error, It returns Nothing
+*/
+
   const handleAutocomplete = async (val) => {
     if (val.length < 3) {
       return;
@@ -105,6 +136,11 @@ const Weather = () => {
     }
   };
 
+  /*
+  // This function makes an API call to retrieve city information from the OpenWeather API based on the user input.
+  // It runs each time the data in the input field changes to return updated suggestions
+  // It then returns an error message or success data
+*/
   useEffect(() => {
     if (city.trim() !== "") {
       handleAutocomplete(city);
@@ -113,159 +149,44 @@ const Weather = () => {
     }
   }, [city]);
 
+  /*
+  // This function makes an API call to retrieve city information from the OpenWeather API based on the user choice from the rendered suggestions.
+  // It then returns an error message or success data
+*/
+
   const handleSelect = (val) => {
     setCity(val);
     handleSearch();
   };
 
   return (
-    <main className="snow w-full h-screen bg-center bg-cover bg-no-repeat text-white">
-      <section className="flex items-start justify-between px-4">
-        <div className="flex flex-col justify-between content-between h-[80vh]">
-          <div className=" grid py-4">
-            <p style={inter.style} className="text-white text-2xl ">
-              {" "}
-              WeatheredUpdate
-            </p>
+    <main className="snow h-screen bg-center bg-cover bg-no-repeat text-white w-full">
+      <section className="sm:flex items-start justify-between px-4 w-full">
+        <div className="flex flex-col justify-between content-between sm:h-[80vh]">
+          <div className=" sm:grid flex justify-between items-center  py-4">
+            <Logo style={inter} />
 
-            <button
-              onClick={handleGeolocationSearch}
-              disabled={loading}
-              className="py-1 px-3 w-fit text-sm rounded mt-4 bg-slate-50 text-[#858585]"
-            >
-              {loading ? "Searching..." : "Use Location"}
-            </button>
-          </div>
-
-          <div className="flex justify-end gap-4 mt-auto">
-            <p className="flex items-center gap-x-2 text-2xl">
-              {weatherData?.main?.temp}{" "}
-              <span>{weatherData && <TbTemperatureCelsius size={40} />}</span>
-            </p>
-            <div>
-              <p className="text-2xl">
-                {weatherData?.name } {weatherData? "," : null} {weatherData?.sys?.country}
-              </p>
-              <p className="flex gap-3 ml-auto">
-                {day} - {date} - {time}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-2/5 drop-shadow-md backdrop-blur-md h-screen rounded py-2">
-          <div className="relative px-2 py-2 mx-2">
-            <span className="absolute bottom-4 left-3">
-              <GrSearch color="#FFFFFF" size={20} />
-            </span>
-            <input
-              type="text"
-              value={city}
-              className="w-full px-4 pl-6 mx-3 py-1 bg-transparent border-b border-white"
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="Enter city name"
+            <GetLocationButton
+              loading={loading}
+              handleGeolocationSearch={handleGeolocationSearch}
             />
           </div>
 
-          <div className="flex justify-between p-2 w-full">
-            <button
-              onClick={handleSearch}
-              disabled={loading}
-              className="px-3 py-1 w-auto ml-auto text-sm rounded bg-slate-50 text-[#858585]"
-            >
-              {loading ? "Searching..." : "Search"}
-            </button>
-          </div>
+          <WeatherSummary weatherData={weatherData} />
+        </div>
 
-          <div className="py-3">
-            {suggestions.length > 0 ? (
-              <ul className="bg-transparent text-white px-4 text-sm ">
-                {suggestions.map((suggest, index) => (
-                  <li
-                    key={index}
-                    onClick={() => handleSelect(suggest)}
-                    className="border-b border-white py-1 cursor-pointer"
-                  >
-                    {suggest}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-center">No Suggestions Yet</p>
-            )}
-          </div>
-          {error && <p>{error}</p>}
-          {loading && (
-            <div className="text-center grid justify-center py-2">
-              <Spinner color="gray" size="lg" />
-            </div>
-          )}
+        <div className="sm:w-2/5 w-full drop-shadow-md backdrop-blur-md md:h-screen rounded py-2 pt-4 sm:pt-0 mt-4 sm:mt-0">
+          <InputBox city={city} setCity={setCity} />
+          <SearchButton loading={loading} handleSearch={handleSearch} />
+
+          <Suggestion suggestions={suggestions} handleSelect={handleSelect} />
+
+          {error && <p className="text-red-800 font-semibold text-center">{error}</p>}
+
+          {loading && <Spinner />}
+
           {weatherData && (
-            <div className="py-4 px-3">
-              <h2 className="text-2xl py-3 tracking-wider" style={inter.style}>
-                {weatherData.name}, {weatherData?.sys?.country}
-              </h2>
-              <div className="py-2 pt-6">
-                <p
-                  className="text-center text-lg flex gap-x-4 uppercase"
-                  style={inter.style}
-                >
-                  Description: <span>{weatherData.weather[0].description}</span>
-                </p>
-                <div className="py-1 pt-5 text-sm grid gap-y-6">
-                  <p className="flex justify-between items-center">
-                    Temp Min:{" "}
-                    <span className="flex items-center justify-between gap-1">
-                      {" "}
-                      {weatherData.main.temp_min}°C{" "}
-                      <FaTemperatureHigh
-                        color="white"
-                        size={18}
-                        className="ml-2"
-                      />
-                    </span>
-                  </p>
-                  <p className="flex justify-between items-center">
-                    Temp Max:{" "}
-                    <span className="flex items-center justify-between gap-1">
-                      {" "}
-                      {weatherData.main.temp_max}°C{" "}
-                      <FaTemperatureHigh
-                        color="red"
-                        size={18}
-                        className="ml-2"
-                      />
-                    </span>
-                  </p>
-                  <p className="flex justify-between items-center">
-                    Humidity:{" "}
-                    <span className="flex items-center justify-between gap-1">
-                      {" "}
-                      {weatherData.main.humidity}%{" "}
-                      <WiHumidity color="white" size={18} className="ml-2" />
-                    </span>
-                  </p>
-                  <p className="flex justify-between items-center">
-                    Wind Speed:
-                    <span className="flex items-center justify-between gap-1">
-                      {weatherData.wind.speed} m/s
-                      <MdOutlineWindPower
-                        color="white"
-                        size={18}
-                        className="ml-2"
-                      />
-                    </span>
-                  </p>
-                  <p className="flex justify-between items-center">
-                    Sea Level:
-                    <span className="flex items-center justify-between gap-1">
-                      {weatherData.main.sea_level} m
-                      <GiAtSea color="white" size={18} className="ml-2" />
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
+            <WeatherInformation data={weatherData} inter={inter} />
           )}
         </div>
       </section>
